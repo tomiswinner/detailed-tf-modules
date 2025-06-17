@@ -53,6 +53,7 @@ resource "aws_security_group_rule" "instance_allow_http_inbound" {
   from_port = var.server_port
   to_port = var.server_port
   protocol = "tcp"
+  cidr_blocks = local.all_ips
 }
 
 
@@ -127,6 +128,7 @@ resource "aws_security_group_rule" "alb_allow_http_inbound" {
   from_port = local.http_port
   to_port = local.http_port
   protocol = local.tcp_protocol
+  cidr_blocks = local.all_ips
 }
 
 ## sg rule outbound
