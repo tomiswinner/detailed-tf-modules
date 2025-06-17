@@ -97,6 +97,14 @@ resource "aws_autoscaling_group" "example" {
     value = "terraform-asg-exapmle"
     propagate_at_launch = true
   }
+  dynamic "tag" {
+    for_each = var.custom_tags
+    content {
+      key = tag.key
+      value = tag.value
+      propagate_at_launch = true
+    }
+  }
   # tf は先にリソースを削除して、その後リソースを作成する
   # asg の場合、古い launch conf への参照を持つので、その削除ができない
   # create_before_destroy を設定することで、古いリソースを先に削除して(古いリソースを更新 = asg が参照する launch conf が更新)から新しいリソースを作成する
