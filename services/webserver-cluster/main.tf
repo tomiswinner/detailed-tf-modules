@@ -88,14 +88,16 @@ resource "aws_autoscaling_group" "example" {
     id = aws_launch_template.example.id
     version = "$Latest"
   }
-  # launch configuration に名前を依存させることで、launch configuration を更新したときに、asg も更新(destroy されて再作成される)
-  name = "${var.cluster_name}-${aws_launch_template.example.name}"
+  ## 今はネイティブソリューションがあるので、使われない
+  # # launch configuration に名前を依存させることで、launch configuration を更新したときに、asg も更新(destroy されて再作成される)
+  # name = "${var.cluster_name}-${aws_launch_template.example.name}"
+  name = var.cluster_name
   vpc_zone_identifier = data.aws_subnets.default.ids
   min_size = var.min_size
   max_size = var.max_size
 
-  # 最小の ELB ヘルスチェック数を設定し、これが完了するまでデプロイが完了判定されない
-  min_elb_capacity = var.min_size
+  # # 最小の ELB ヘルスチェック数を設定し、これが完了するまでデプロイが完了判定されない
+  # min_elb_capacity = var.min_size
 
   target_group_arns = [aws_lb_target_group.asg.arn]
   health_check_type = "ELB"
@@ -112,11 +114,21 @@ resource "aws_autoscaling_group" "example" {
       propagate_at_launch = true
     }
   }
+
+  ## ネイティブソリューションがあるので、ゼロダウンタイムデプロイには不要
   # tf は先にリソースを削除して、その後リソースを作成する
   # asg の場合、古い launch conf への参照を持つので、その削除ができない
   # create_before_destroy を設定することで、古いリソースを先に削除して(古いリソースを更新 = asg が参照する launch conf が更新)から新しいリソースを作成する
-  lifecycle {
-    create_before_destroy = true   
+  # lifecycle {
+  #   create_before_destroy = true   
+  # }
+
+  # 今はこれ
+  instance_refresh {
+    strategy = "Rolling"
+    preferences {
+      min_healthy_percentage = 80
+    }
   }
 }
 
