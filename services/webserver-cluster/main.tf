@@ -63,7 +63,7 @@ resource "aws_security_group_rule" "instance_allow_http_inbound" {
 ## path.root : terraform apply 実行時の起点となるファイルが存在するパス
 ## path.cwd : 現在のディレクトリ
 resource "aws_launch_template" "example" {
-  image_id = "ami-0fb653ca2d3203ac1"
+  image_id = var.ami
   # https://stackoverflow.com/questions/31569910/terraform-throws-groupname-cannot-be-used-with-the-parameter-subnet-or-vpc-se
   vpc_security_group_ids = [aws_security_group.instance.id]
   instance_type = var.instance_type
@@ -71,6 +71,7 @@ resource "aws_launch_template" "example" {
     server_port = var.server_port
     db_address = data.terraform_remote_state.db.outputs.address
     db_port = data.terraform_remote_state.db.outputs.port
+    server_text = var.server_text
   }))
 
   # なぜか asg + launch template の場合、create_before_destroy を設定しないと、更新時にエラーが出るらしい、、？
@@ -123,7 +124,7 @@ resource "aws_autoscaling_schedule" "scale_out_during_business_hours" {
   max_size = 10
   desired_capacity = 10
   recurrence = "0 9 * * *"
-  autoscaling_group_name = module.webserver_cluster.asg_name
+  autoscaling_group_name = aws_autoscaling_group.example.name
 }
 
 resource "aws_autoscaling_schedule" "scale_in_at_night" {
@@ -133,7 +134,7 @@ resource "aws_autoscaling_schedule" "scale_in_at_night" {
   max_size = 10
   desired_capacity = 2
   recurrence = "0 17 * * *"
-  autoscaling_group_name = module.webserver_cluster.asg_name
+  autoscaling_group_name = aws_autoscaling_group.example.name
 }
 
 

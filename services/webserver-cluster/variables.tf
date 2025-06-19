@@ -39,4 +39,14 @@ variable "enable_autoscaling" {
   type = bool
 }
 
+variable "ami" {
+  description = "The AMI to use for the instances"
+  type = string
+  default = "ami-0fb653ca2d3203ac1"
+}
 
+variable "server_text" {
+  description = "The text the server will output"
+  type = string
+  default = "Hello, World"
+}
